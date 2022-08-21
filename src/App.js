@@ -22,9 +22,15 @@ const TodoItemInputField = (props) => {
   </div>);
 };
 
+const TodoItem = (props) => {
+  return (<li>
+    <span>{props.todoItem.todoItemContent}</span>
+  </li>);
+};
+
 const TodoItemList = (props) => {
   const todoList = props.todoItemList.map((todoItem, index) => {
-    return <li key={index}>{todoItem.todoItemContent}</li>;
+    return <TodoItem key={todoItem.id} todoItem={todoItem} />;
   });
 
   return (<div>
