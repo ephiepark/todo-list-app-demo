@@ -32,12 +32,22 @@ const TodoItemList = (props) => {
   </div>);
 };
 
+let todoItemId = 0;
+
 function App() {
   const [todoItemList, setTodoItemList] = useState([]);
 
+  const onSubmit = (newTodoItem) => {
+    setTodoItemList([...todoItemList, {
+      id: todoItemId++,
+      todoItemContent: newTodoItem,
+      isFinished: false,
+    }]);
+  };
+
   return (
     <div className="App">
-      <TodoItemInputField onSubmit={(input) => { console.log(input) }} />
+      <TodoItemInputField onSubmit={onSubmit} />
       <TodoItemList todoItemList={todoItemList} />
     </div>
   );
