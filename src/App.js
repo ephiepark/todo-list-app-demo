@@ -11,7 +11,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import {
   getFirestore, collection, addDoc, setDoc, doc, deleteDoc, getDocs, query,
-  orderBy,
+  orderBy, where
 } from "firebase/firestore";
 import {
   GoogleAuthProvider,
@@ -130,7 +130,7 @@ function App() {
   });
 
   const syncTodoItemListStateWithFirestore = () => {
-    const q = query(collection(db, "todoItem"), orderBy("createdTime", "desc"));
+    const q = query(collection(db, "todoItem"), where("userId", "==", currentUser), orderBy("createdTime", "desc"));
     getDocs(q).then((querySnapshot) => {
       const firestoreTodoItemList = [];
       querySnapshot.forEach((doc) => {
@@ -148,7 +148,7 @@ function App() {
 
   useEffect(() => {
     syncTodoItemListStateWithFirestore();
-  }, []);
+  }, [currentUser]);
 
   const onSubmit = async (newTodoItem) => {
     await addDoc(collection(db, "todoItem"), {
