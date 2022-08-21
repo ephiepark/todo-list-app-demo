@@ -13,6 +13,13 @@ import {
   getFirestore, collection, addDoc, setDoc, doc, deleteDoc, getDocs, query,
   orderBy,
 } from "firebase/firestore";
+import {
+  GoogleAuthProvider,
+  getAuth,
+  signInWithRedirect,
+  onAuthStateChanged,
+  signOut,
+} from "firebase/auth";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -33,6 +40,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
+
+const provider = new GoogleAuthProvider();
+const auth = getAuth(app);
 
 const TodoItemInputField = (props) => {
   const [input, setInput] = useState("");
@@ -82,13 +92,25 @@ const TodoItemList = (props) => {
 };
 
 const TodoListAppBar = (props) => {
+  const loginWithGoogleButton = (
+    <Button color="inherit" onClick={() => {
+      signInWithRedirect(auth, provider);
+    }}>Login with Google</Button>
+  );
+  const logoutButton = (
+    <Button color="inherit" onClick={() => {
+      signOut(auth);
+    }}>Log out</Button>
+  );
+  const button = props.currentUser === null ? loginWithGoogleButton : logoutButton;
+
   return (
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Todo List App
         </Typography>
-        <Button color="inherit">Log In</Button>
+        {button}
       </Toolbar>
     </AppBar>
   );
@@ -97,6 +119,15 @@ const TodoListAppBar = (props) => {
 
 function App() {
   const [todoItemList, setTodoItemList] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setCurrentUser(user.uid);
+    } else {
+      setCurrentUser(null);
+    }
+  });
 
   const syncTodoItemListStateWithFirestore = () => {
     const q = query(collection(db, "todoItem"), orderBy("createdTime", "desc"));
@@ -141,7 +172,7 @@ function App() {
 
   return (
     <div className="App">
-      <TodoListAppBar />
+      <TodoListAppBar currentUser={currentUser} />
       <TodoItemInputField onSubmit={onSubmit} />
       <TodoItemList
         todoItemList={todoItemList}
